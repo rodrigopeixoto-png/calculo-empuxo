@@ -107,12 +107,17 @@ empuxo_solo = np.trapezoid(pressao_solo_efetiva, z_pts)
 empuxo_agua = np.trapezoid(u_agua, z_pts)
 empuxo_total = empuxo_solo + empuxo_agua
 
-# Adicione isso logo após calcular empuxo_total = empuxo_solo + empuxo_agua
-# Cálculo do Ponto de Aplicação (Centro de Gravidade do Diagrama de Pressões)
+# ==========================================
+# CÁLCULO DO PONTO DE APLICAÇÃO (A partir da base)
+# ==========================================
 if empuxo_total > 0:
-    # y_bar = Somatório(Área * braço_de_alavanca) / Área_Total
-    # O braço de alavanca é a altura a partir da BASE (H - z)
-    momento_estatico = np.trapezoid(pressao_total * (H - z_pts), z_pts)
+    # Altura de cada ponto em relação à base (z=0 está no topo, então a base é z=H)
+    alturas_da_base = H - z_pts  # No topo é H, na base é 0
+    
+    # Momento estático total da área do diagrama em relação à base
+    momento_estatico = np.trapezoid(pressao_total * alturas_da_base, z_pts)
+    
+    # O centroide (altura a partir da base) é o momento dividido pela força total
     y_aplicacao_base = momento_estatico / empuxo_total
 else:
     y_aplicacao_base = 0.0

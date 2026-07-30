@@ -77,8 +77,8 @@ pressao_solo_efetiva = np.maximum(pressao_solo_efetiva, 0) # Zona de tração n�
 pressao_total = pressao_solo_efetiva + u_agua
 
 # Integração (Cálculo da força total em kN/m) - Área do trapézio/triângulo
-empuxo_solo = np.trapz(pressao_solo_efetiva, z_pts)
-empuxo_agua = np.trapz(u_agua, z_pts)
+empuxo_solo = np.trapezoid(pressao_solo_efetiva, z_pts)
+empuxo_agua = np.trapezoid(u_agua, z_pts)
 empuxo_total = empuxo_solo + empuxo_agua
 
 # ==========================================

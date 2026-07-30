@@ -146,3 +146,55 @@ ax.set_xlabel('Pressão Horizontal (kPa)')
 ax.grid(True, linestyle=':', alpha=0.6)
 ax.legend(loc='lower left')
 st.pyplot(fig)
+
+# ==========================================
+# EXPORTAÇÃO / RELATÓRIO
+# ==========================================
+st.divider()
+st.subheader("Documentação")
+
+# Montando o texto do relatório com os resultados
+texto_relatorio = f"""========================================
+MEMÓRIA DE CÁLCULO - EMPUXO DE TERRA
+========================================
+
+1. PARÂMETROS DE ENTRADA (GEOMETRIA):
+- Altura do Muro (H): {H:.2f} m
+- Lençol Freático: {'Ausente (Muro Drenado)' if sem_agua else f'Presente a {zw:.2f} m do topo'}
+- Estrutura: {tipo_muro}
+- Distância entre Pilares (l): {dist_pilares:.2f} m
+
+2. PARÂMETROS DE ENTRADA (SOLO E CARGAS):
+- Comportamento do Solo: {tipo_solo}
+- Peso Específico Natural: {gamma:.2f} kN/m³
+- Peso Específico Saturado: {gamma_sat:.2f} kN/m³
+- Ângulo de Atrito Interno: {phi:.2f} graus
+- Coesão: {c:.2f} kPa
+- Sobrecarga no Topo: {q:.2f} kPa
+- Inclinação do Maciço (Beta): {beta:.2f} graus
+
+3. RESULTADOS DO CÁLCULO (RANKINE):
+- Coeficiente de Empuxo Ativo (Ka): {ka:.4f}
+- Empuxo Total Distribuído: {empuxo_total:.2f} kN/m
+- Altura do Ponto de Aplicação (da base): {y_aplicacao_base:.2f} m
+"""
+
+# Adicionando a carga pontual se for muro reticulado
+if tipo_muro == "Reticulado com Pilares (Carga pontual em kN)":
+    texto_relatorio += f"""
+4. CARGA PARA SOFTWARE ESTRUTURAL (Ex: Eberick):
+- Força Horizontal Concentrada no Pilar: {(empuxo_total * dist_pilares):.2f} kN
+- Ponto de Aplicação (y medido da base): {y_aplicacao_base:.2f} m
+"""
+
+texto_relatorio += "\n========================================\nGerado pela Calculadora de Empuxo"
+
+# Botão de Download do Streamlit
+st.download_button(
+    label="📄 Baixar Memória de Cálculo (.txt)",
+    data=texto_relatorio,
+    file_name="memoria_calculo_empuxo.txt",
+    mime="text/plain"
+)
+
+st.caption("Dica: Para imprimir a tela inteira com o gráfico, você também pode pressionar **Ctrl + P** no seu navegador.")

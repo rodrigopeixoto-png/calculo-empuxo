@@ -107,6 +107,19 @@ empuxo_solo = np.trapezoid(pressao_solo_efetiva, z_pts)
 empuxo_agua = np.trapezoid(u_agua, z_pts)
 empuxo_total = empuxo_solo + empuxo_agua
 
+# Adicione isso logo após calcular empuxo_total = empuxo_solo + empuxo_agua
+# Cálculo do Ponto de Aplicação (Centro de Gravidade do Diagrama de Pressões)
+if empuxo_total > 0:
+    # y_bar = Somatório(Área * braço_de_alavanca) / Área_Total
+    # O braço de alavanca é a altura a partir da BASE (H - z)
+    momento_estatico = np.trapezoid(pressao_total * (H - z_pts), z_pts)
+    y_aplicacao_base = momento_estatico / empuxo_total
+else:
+    y_aplicacao_base = 0.0
+
+# Lá na interface do Streamlit (onde ficam as colunas col1, col2...), você pode adicionar:
+st.metric("Ponto de Aplicação (da base)", f"{y_aplicacao_base:.2f} m")
+
 # ==========================================
 # EXIBIÇÃO DOS RESULTADOS (UI STREAMLIT)
 # ==========================================

@@ -31,10 +31,29 @@ else:
     zw = st.sidebar.number_input("Profundidade do Lençol Freático (m)", min_value=0.0, max_value=float(H), value=2.0, step=0.5, help="Medido a partir do topo do muro.")
 
 st.sidebar.subheader("Propriedades do Solo")
+
+# 1. Escolha do tipo de solo (Oculta ou mostra a coesão)
+tipo_solo = st.sidebar.radio(
+    "Comportamento do Solo",
+    ["Não Coesivo (Areias, Cascalhos)", "Coesivo (Argilas, Siltes)"]
+)
+
 gamma = st.sidebar.number_input("Peso Específico Natural (kN/m³)", min_value=10.0, value=16.0, step=0.5)
-gamma_sat = st.sidebar.number_input("Peso Específico Saturado (kN/m³)", min_value=10.0, value=19.0, step=0.5)
+
+# 2. Lógica da Água (Oculta o Peso Saturado se não tiver água)
+if sem_agua:
+    gamma_sat = gamma  # Valor apenas interno para evitar erro no código
+else:
+    st.sidebar.caption("Água presente: informe o peso do solo saturado.")
+    gamma_sat = st.sidebar.number_input("Peso Específico Saturado (kN/m³)", min_value=10.0, value=19.0, step=0.5, help="Geralmente 1.5 a 3.0 maior que o Peso Natural.")
+
 phi = st.sidebar.number_input("Ângulo de Atrito Interno (graus)", min_value=1.0, value=30.0, step=1.0)
-c = st.sidebar.number_input("Coesão (kPa)", min_value=0.0, value=0.0, step=1.0)
+
+# 3. Lógica da Coesão
+if tipo_solo == "Coesivo (Argilas, Siltes)":
+    c = st.sidebar.number_input("Coesão (kPa)", min_value=0.0, value=10.0, step=1.0)
+else:
+    c = 0.0  # Internamente define como zero e não exibe o campo na tela
 
 st.sidebar.subheader("Condições Adicionais")
 q = st.sidebar.number_input("Sobrecarga no Topo (kPa)", min_value=0.0, value=0.0, step=5.0)

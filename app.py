@@ -21,7 +21,14 @@ st.sidebar.header("Parâmetros de Entrada")
 
 st.sidebar.subheader("Geometria")
 H = st.sidebar.number_input("Altura do Muro (H) em metros", min_value=1.0, max_value=20.0, value=4.0, step=0.5)
-zw = st.sidebar.number_input("Profundidade do Lençol Freático (m)", min_value=0.0, max_value=float(H), value=2.0, step=0.5, help="Medido a partir do topo do muro. Coloque igual à altura do muro se for totalmente drenado.")
+
+# Checkbox para ausência de água
+sem_agua = st.sidebar.checkbox("Lençol freático ausente (Muro Drenado)", value=False)
+
+if sem_agua:
+    zw = float(H)  # Se não há água, consideramos a profundidade igual à base (sem empuxo)
+else:
+    zw = st.sidebar.number_input("Profundidade do Lençol Freático (m)", min_value=0.0, max_value=float(H), value=2.0, step=0.5, help="Medido a partir do topo do muro.")
 
 st.sidebar.subheader("Propriedades do Solo")
 gamma = st.sidebar.number_input("Peso Específico Natural (kN/m³)", min_value=10.0, value=16.0, step=0.5)

@@ -81,11 +81,8 @@ cos_phi = math.cos(phi_rad)
 raiz = math.sqrt(max(0, cos_beta**2 - cos_phi**2))
 ka = cos_beta * ((cos_beta - raiz) / (cos_beta + raiz))
 
-# Arrays de profundidade (z)
-if zw == 0 or zw == H:
-    z_pts = np.array([0.0, H])
-else:
-    z_pts = np.array([0.0, zw, H])
+# Arrays de profundidade (z) fatiado em 100 pontos para integração perfeita
+z_pts = np.linspace(0.0, float(H), 100)
 
 sigma_v_efetiva = np.zeros_like(z_pts)
 u_agua = np.zeros_like(z_pts)

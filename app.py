@@ -206,29 +206,59 @@ text_parametros = (
 pdf.multi_cell(0, 8, text_parametros)
 pdf.ln(5)
 
-# 2. Resultados do Cálculo
+# 2. Metodologia e Passo a Passo
 pdf.set_font("Arial", "B", 12)
-pdf.cell(0, 10, "2. RESULTADOS DO CALCULO (RANKINE)", ln=True)
+pdf.cell(0, 10, "2. METODOLOGIA E MEMORIA DE CALCULO", ln=True)
+pdf.set_font("Arial", size=11)
+
+# Pegando os valores exatos na base do muro (último ponto do array)
+sigma_v_base = sigma_v_efetiva[-1]
+u_base = u_agua[-1]
+pressao_solo_base = pressao_solo_efetiva[-1]
+pressao_total_base = pressao_total[-1]
+parcela_coesao = 2 * c * math.sqrt(ka)
+
+memoria_txt = (
+    "Teoria Adotada: Empuxo Ativo de Rankine com Principio das Tensoes Efetivas.\n\n"
+    f"A) COEFICIENTE DE EMPUXO ATIVO (Ka):\n"
+    f"Ka = cos(Beta) * [cos(Beta) - sqrt(cos^2(Beta) - cos^2(Phi))] / [cos(Beta) + sqrt(cos^2(Beta) - cos^2(Phi))]\n"
+    f"Substituindo Phi = {phi:.2f} graus e Beta = {beta:.2f} graus:\n"
+    f"-> Ka = {ka:.4f}\n\n"
+    f"B) TENSOES NA BASE DO MURO (Profundidade z = {H:.2f} m):\n"
+    f"- Tensao Vertical Efetiva (Sigma_v'): {sigma_v_base:.2f} kPa\n"
+    f"- Pressao Neutra / Agua (u): {u_base:.2f} kPa\n"
+    f"- Reducao por Coesao (2 * c * sqrt(Ka)): {parcela_coesao:.2f} kPa\n"
+    f"- Pressao Horizontal do Solo [ (Sigma_v' * Ka) - Coesao ]: {pressao_solo_base:.2f} kPa\n"
+    f"-> PRESSAO HORIZONTAL TOTAL NA BASE (Solo + Agua): {pressao_total_base:.2f} kPa\n\n"
+    f"C) FORCAS RESULTANTES (Integracao das Areas do Diagrama):\n"
+    f"- Empuxo Efetivo do Solo: {empuxo_solo:.2f} kN/m\n"
+    f"- Empuxo Hidrostatico (Agua): {empuxo_agua:.2f} kN/m"
+)
+pdf.multi_cell(0, 6, memoria_txt)
+pdf.ln(5)
+
+# 3. Resultados Finais
+pdf.set_font("Arial", "B", 12)
+pdf.cell(0, 10, "3. RESULTADOS FINAIS DE PROJETO", ln=True)
 pdf.set_font("Arial", size=11)
 
 text_resultados = (
-    f"- Coeficiente de Empuxo Ativo (Ka): {ka:.4f}\n"
-    f"- Empuxo Total Distribuido: {empuxo_total:.2f} kN/m\n"
-    f"- Ponto de Aplicacao (y, da base): {y_aplicacao_base:.2f} m"
+    f"- Empuxo Total Distribuido (E): {empuxo_total:.2f} kN/m\n"
+    f"- Altura de Aplicacao (y, medido da base): {y_aplicacao_base:.2f} m"
 )
-pdf.multi_cell(0, 8, text_resultados)
+pdf.multi_cell(0, 7, text_resultados)
 
 # Carga pontual se for reticulado
 if tipo_muro == "Reticulado com Pilares (Carga pontual em kN)":
     pdf.ln(3)
     pdf.set_font("Arial", "B", 11)
     carga_pilar = empuxo_total * dist_pilares
-    pdf.multi_cell(0, 8, f"=> CARGA NO PILAR (Eberick/TQS): {carga_pilar:.2f} kN aplicados a {y_aplicacao_base:.2f} m da base.")
+    pdf.multi_cell(0, 7, f"=> CARGA PONTUAL NO PILAR (Eberick/TQS): {carga_pilar:.2f} kN (Aplicados a {y_aplicacao_base:.2f} m da base)")
 
-# 3. Inserindo o Gráfico no PDF
+# 4. Inserindo o Gráfico no PDF
 pdf.ln(5)
 pdf.set_font("Arial", "B", 12)
-pdf.cell(0, 10, "3. DIAGRAMA DE PRESSOES HORIZONTAIS", ln=True)
+pdf.cell(0, 10, "4. DIAGRAMA DE PRESSOES HORIZONTAIS", ln=True)
 
 # O Python salva o gráfico em um arquivo "fantasma" (tempfile) e cola no PDF
 with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmpfile:

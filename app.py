@@ -2,6 +2,8 @@ import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
 import math
+import tempfile
+from fpdf import FPDF
 
 # ==========================================
 # CONFIGURAÇÃO DA PÁGINA STREAMLIT
@@ -148,53 +150,80 @@ ax.legend(loc='lower left')
 st.pyplot(fig)
 
 # ==========================================
-# EXPORTAÇÃO / RELATÓRIO
+# EXPORTAÇÃO EM PDF (MEMÓRIA DE CÁLCULO)
 # ==========================================
 st.divider()
-st.subheader("Documentação")
+st.subheader("📄 Exportar Documentação")
 
-# Montando o texto do relatório com os resultados
-texto_relatorio = f"""========================================
-MEMÓRIA DE CÁLCULO - EMPUXO DE TERRA
-========================================
+# Iniciando a criação do arquivo PDF
+pdf = FPDF()
+pdf.add_page()
 
-1. PARÂMETROS DE ENTRADA (GEOMETRIA):
-- Altura do Muro (H): {H:.2f} m
-- Lençol Freático: {'Ausente (Muro Drenado)' if sem_agua else f'Presente a {zw:.2f} m do topo'}
-- Estrutura: {tipo_muro}
-- Distância entre Pilares (l): {dist_pilares:.2f} m
+# Título do Relatório
+pdf.set_font("Arial", "B", 16)
+pdf.cell(0, 10, "MEMORIA DE CALCULO - EMPUXO DE TERRA", ln=True, align="C")
+pdf.ln(5)
 
-2. PARÂMETROS DE ENTRADA (SOLO E CARGAS):
-- Comportamento do Solo: {tipo_solo}
-- Peso Específico Natural: {gamma:.2f} kN/m³
-- Peso Específico Saturado: {gamma_sat:.2f} kN/m³
-- Ângulo de Atrito Interno: {phi:.2f} graus
-- Coesão: {c:.2f} kPa
-- Sobrecarga no Topo: {q:.2f} kPa
-- Inclinação do Maciço (Beta): {beta:.2f} graus
+# 1. Parâmetros de Entrada
+pdf.set_font("Arial", "B", 12)
+pdf.cell(0, 10, "1. PARAMETROS DE ENTRADA", ln=True)
+pdf.set_font("Arial", size=11)
 
-3. RESULTADOS DO CÁLCULO (RANKINE):
-- Coeficiente de Empuxo Ativo (Ka): {ka:.4f}
-- Empuxo Total Distribuído: {empuxo_total:.2f} kN/m
-- Altura do Ponto de Aplicação (da base): {y_aplicacao_base:.2f} m
-"""
+agua_txt = "Ausente (Muro Drenado)" if sem_agua else f"Presente a {zw:.2f} m do topo"
 
-# Adicionando a carga pontual se for muro reticulado
+text_parametros = (
+    f"- Altura do Muro (H): {H:.2f} m\n"
+    f"- Lencol Freatico: {agua_txt}\n"
+    f"- Estrutura: {tipo_muro}\n"
+    f"- Distancia entre Pilares (l): {dist_pilares:.2f} m\n"
+    f"- Solo: {tipo_solo}\n"
+    f"- Peso Espec. Natural: {gamma:.2f} kN/m3\n"
+    f"- Angulo de Atrito: {phi:.2f} graus\n"
+    f"- Coesao: {c:.2f} kPa\n"
+    f"- Sobrecarga no Topo: {q:.2f} kPa"
+)
+pdf.multi_cell(0, 8, text_parametros)
+pdf.ln(5)
+
+# 2. Resultados do Cálculo
+pdf.set_font("Arial", "B", 12)
+pdf.cell(0, 10, "2. RESULTADOS DO CALCULO (RANKINE)", ln=True)
+pdf.set_font("Arial", size=11)
+
+text_resultados = (
+    f"- Coeficiente de Empuxo Ativo (Ka): {ka:.4f}\n"
+    f"- Empuxo Total Distribuido: {empuxo_total:.2f} kN/m\n"
+    f"- Ponto de Aplicacao (y, da base): {y_aplicacao_base:.2f} m"
+)
+pdf.multi_cell(0, 8, text_resultados)
+
+# Carga pontual se for reticulado
 if tipo_muro == "Reticulado com Pilares (Carga pontual em kN)":
-    texto_relatorio += f"""
-4. CARGA PARA SOFTWARE ESTRUTURAL (Ex: Eberick):
-- Força Horizontal Concentrada no Pilar: {(empuxo_total * dist_pilares):.2f} kN
-- Ponto de Aplicação (y medido da base): {y_aplicacao_base:.2f} m
-"""
+    pdf.ln(3)
+    pdf.set_font("Arial", "B", 11)
+    carga_pilar = empuxo_total * dist_pilares
+    pdf.multi_cell(0, 8, f"=> CARGA NO PILAR (Eberick/TQS): {carga_pilar:.2f} kN aplicados a {y_aplicacao_base:.2f} m da base.")
 
-texto_relatorio += "\n========================================\nGerado pela Calculadora de Empuxo"
+# 3. Inserindo o Gráfico no PDF
+pdf.ln(5)
+pdf.set_font("Arial", "B", 12)
+pdf.cell(0, 10, "3. DIAGRAMA DE PRESSOES HORIZONTAIS", ln=True)
 
-# Botão de Download do Streamlit
+# O Python salva o gráfico em um arquivo "fantasma" (tempfile) e cola no PDF
+with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmpfile:
+    fig.savefig(tmpfile.name, format="png", bbox_inches="tight", dpi=150)
+    pdf.image(tmpfile.name, x=15, w=170)
+
+# Convertendo o PDF gerado em arquivo baixável
+pdf_bytes = bytes(pdf.output())
+
+# Exibindo o botão na tela do Streamlit
 st.download_button(
-    label="📄 Baixar Memória de Cálculo (.txt)",
-    data=texto_relatorio,
-    file_name="memoria_calculo_empuxo.txt",
-    mime="text/plain"
+    label="📥 Baixar Memória de Cálculo (PDF)",
+    data=pdf_bytes,
+    file_name="memoria_calculo_empuxo.pdf",
+    mime="application/pdf",
+    type="primary"
 )
 
 st.caption("Dica: Para imprimir a tela inteira com o gráfico, você também pode pressionar **Ctrl + P** no seu navegador.")

@@ -175,7 +175,15 @@ pdf.add_page()
 # Título do Relatório
 pdf.set_font("Arial", "B", 16)
 pdf.cell(0, 10, "MEMORIA DE CALCULO - EMPUXO DE TERRA", ln=True, align="C")
+
+# Subtítulo (Identificação)
+pdf.set_font("Arial", "I", 11) # Fonte em itálico para diferenciar
+pdf.cell(0, 6, f"Projeto: {nome_projeto}", ln=True, align="C")
+pdf.cell(0, 6, f"Responsavel Tecnico: {autor}", ln=True, align="C")
 pdf.ln(5)
+
+# 1. Parâmetros de Entrada
+# (O resto do bloco do PDF continua igual a partir daqui...)
 
 # 1. Parâmetros de Entrada
 pdf.set_font("Arial", "B", 12)

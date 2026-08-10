@@ -21,6 +21,19 @@ e o **Princípio das Tensões Efetivas de Terzaghi** (considerando a presença d
 # ==========================================
 st.sidebar.header("Parâmetros de Entrada")
 
+# ==========================================
+# BARRA LATERAL (INPUTS DO USUÁRIO)
+# ==========================================
+st.sidebar.header("Parâmetros de Entrada")
+
+# --- Identificação do Projeto ---
+st.sidebar.subheader("Identificação")
+nome_projeto = st.sidebar.text_input("Nome do Projeto", value="Muro de Contenção - Residência X")
+autor = st.sidebar.text_input("Responsável Técnico", value="Eng. Seu Nome")
+
+# --- Geometria ---
+# (O resto do seu código continua igual a partir daqui...)
+
 # --- Geometria ---
 st.sidebar.subheader("Geometria")
 H = st.sidebar.number_input("Altura do Muro (H) em metros", min_value=1.0, max_value=20.0, value=4.0, step=0.5)
